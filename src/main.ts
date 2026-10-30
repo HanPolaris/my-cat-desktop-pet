@@ -98,7 +98,11 @@ function markWakeTarget() {
             '<html><body style="margin:0;background:transparent"><svg width="44" height="56" xmlns="http://www.w3.org/2000/svg"><path d="M8 52V4" stroke="#886b3b" stroke-width="3"/><path d="M10 5h28l-8 10 8 10H10Z" fill="#e9b64a" stroke="#b88521"/></svg></body></html>',
           ),
       )
-      .catch((error) => logDiagnostic("flag-load-failed " + error.message));
+      .catch((error) => {
+        // Closing during the initial navigation cancels it normally.
+        if (!quitting && !createdFlag.isDestroyed())
+          logDiagnostic("flag-load-failed " + error.message);
+      });
   }
   const a = screen.getDisplayNearestPoint(target).workArea;
   flag.setPosition(
@@ -283,6 +287,9 @@ else
     win.setIgnoreMouseEvents(true, { forward: true });
     win.loadFile(path.join(__dirname, "index.html"));
     win.once("ready-to-show", () => win.showInactive());
+    win.on("closed", () => {
+      if (!quitting) app.quit();
+    });
     win.on("blur", () => {
       if (card) {
         card = false;
