@@ -289,6 +289,51 @@
         400
       ],
       "loop": true
+    },
+    "yawning": {
+      "file": "extra/yawning.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        260,
+        300,
+        360,
+        400,
+        360,
+        320
+      ],
+      "loop": false
+    },
+    "lying-down": {
+      "file": "extra/lying-down.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        180,
+        180,
+        180,
+        220,
+        240,
+        300
+      ],
+      "loop": false
+    },
+    "head-tilt": {
+      "file": "extra/head-tilt.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        220,
+        300,
+        360,
+        300,
+        220
+      ],
+      "loop": false
     }
   }
 }

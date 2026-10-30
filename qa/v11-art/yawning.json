@@ -1,0 +1,21 @@
+{
+  "state": "yawning",
+  "source": "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\sources\\yawning.png",
+  "frames": [
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\00.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\01.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\02.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\03.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\04.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\yawning\\05.png"
+  ],
+  "method": "stable-slots",
+  "durations": [
+    260,
+    300,
+    360,
+    400,
+    360,
+    320
+  ]
+}

@@ -2,6 +2,9 @@ node_modules/
 dist/
 release/
 .runtime/
+versions/
+qa/v11-art/sources/
+qa/v11-runtime/
 art-run/
 media-analysis/tools/
 media-analysis/audio-reference/

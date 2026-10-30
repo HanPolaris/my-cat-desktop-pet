@@ -1,0 +1,21 @@
+{
+  "state": "head-tilt",
+  "source": "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\sources\\head-tilt.png",
+  "frames": [
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\00.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\01.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\02.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\03.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\04.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\head-tilt\\05.png"
+  ],
+  "method": "stable-slots",
+  "durations": [
+    200,
+    220,
+    300,
+    360,
+    300,
+    220
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "state": "lying-down",
+  "source": "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\sources\\lying-down.png",
+  "frames": [
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\00.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\01.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\02.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\03.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\04.png",
+    "D:\\document\\Codex\\xiaomi-desktop-pet\\qa\\v11-art\\frames\\lying-down\\05.png"
+  ],
+  "method": "stable-slots",
+  "durations": [
+    180,
+    180,
+    180,
+    220,
+    240,
+    300
+  ]
+}

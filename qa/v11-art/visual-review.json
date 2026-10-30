@@ -1,0 +1,378 @@
+{
+  "overall_status": "pass",
+  "review_type": "independent visual and deterministic extraction review",
+  "failures": [],
+  "coverage": "Inspected all three original-resolution contact sheets and all six decoded frames of each GIF on a dark background (18 frames total).",
+  "common_findings": [
+    "All exports are 192x208 per frame with six GIF frames and manifest-matching durations.",
+    "All alpha bounds retain at least 5 pixels of edge padding; no cropped ears, paws, tails or touching adjacent sprites.",
+    "No visually detectable pink fringe on light contact sheets or dark GIF composites. Conservative magenta pixel test found zero suspect pixels per PNG; transparent pixels all have RGB zero.",
+    "No props, text, visible layout guides, cast shadows or extra cats.",
+    "Xiaomi identity and row-internal scale are maintained. GIF palette transparency has a thin light fur edge at some pixels but no magenta halo."
+  ],
+  "extraction_review": {
+    "status": "pass",
+    "files_reviewed": [
+      "art-tools/export_v11.py",
+      "C:/Users/WangHangang/.codex/skills/hatch-pet/scripts/extract_strip_frames.py"
+    ],
+    "evidence": [
+      "Source strip is opened read-only and converted to RGBA; no save or write targets the source strip.",
+      "stable-slots groups connected sprite components, uses a common top/bottom and maximum width viewport, centers each sprite horizontally, and uniformly fits those equal viewports to the target cell. It does not synthesize poses or redraw cat anatomy.",
+      "export_v11.py applies chroma removal, exported-edge RGB despill, transparent-pixel RGB normalization, and deterministic contact/GIF/WEBP assembly. These operations change derived output pixels only.",
+      "Shared row viewport preserves vertical motion and scale, avoiding per-pose bounding-box enlargement."
+    ],
+    "limitation": "This verifies code paths and resulting exports; no pre-run source hash was available for a historical before/after comparison."
+  },
+  "rows": {
+    "yawning": {
+      "status": "pass",
+      "evidence": [
+        "Exactly six complete seated full-body poses with both ears, grounded paws and compact plume tails visible.",
+        "Clear sleepy opening, wide-jaw yawn with visible tongue/teeth at frames 2-3, closure and lowered drowsy head at frame 5.",
+        "Orange longhair, cream muzzle, pink nose and heavy paw/body proportions remain consistent with canonical Xiaomi.",
+        "Feet retain a common baseline (alpha bottom 203 in every frame); head height changes follow the yawn."
+      ],
+      "inspected_contact": "qa\\v11-art\\yawning-contact.jpg",
+      "inspected_gif": "qa\\v11-art\\yawning.gif",
+      "gif_frame_sample": "qa\\v11-art\\yawning-gif-decoded.png",
+      "source_sha256": "7292cf4137c0d2559036488b2a6ac77b89ae306aa931d88dc7945ac85e2170ea",
+      "metrics": {
+        "gif_frames": 6,
+        "gif_durations_ms": [
+          260,
+          300,
+          360,
+          400,
+          360,
+          320
+        ],
+        "frames": [
+          {
+            "file": "00.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              19,
+              14,
+              173,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "01.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              24,
+              14,
+              168,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "02.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              23,
+              5,
+              169,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "03.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              24,
+              7,
+              168,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "04.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              25,
+              14,
+              167,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "05.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              21,
+              22,
+              171,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          }
+        ]
+      }
+    },
+    "head-tilt": {
+      "status": "pass",
+      "evidence": [
+        "Exactly six complete seated poses, normal -> right tilt -> opposite tilt -> normal.",
+        "Repaired tail remains on viewer-right in all six frames; tail size, grounded body and paws stay stable.",
+        "Whole ears, paws, curled tail and fluffy orange-tabby identity remain visible.",
+        "Every frame has identical alpha left/right bounds 27/164 and bottom 203; no frame-specific scale pumping detected."
+      ],
+      "inspected_contact": "qa\\v11-art\\head-tilt-contact.jpg",
+      "inspected_gif": "qa\\v11-art\\head-tilt.gif",
+      "gif_frame_sample": "qa\\v11-art\\head-tilt-gif-decoded.png",
+      "source_sha256": "3739004085e760b7d0aaec530b71f0f795accb1b2ea151a61d00db407ce1851a",
+      "metrics": {
+        "gif_frames": 6,
+        "gif_durations_ms": [
+          200,
+          220,
+          300,
+          360,
+          300,
+          220
+        ],
+        "frames": [
+          {
+            "file": "00.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              14,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "01.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              5,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "02.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              5,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "03.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              5,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "04.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              10,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "05.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              27,
+              14,
+              164,
+              203
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          }
+        ]
+      }
+    },
+    "lying-down": {
+      "status": "pass",
+      "evidence": [
+        "Exactly six complete full-body poses transition from high standing posture through bending forelegs and lowering shoulders to a settled lying pose.",
+        "Forepaws reach forward as chest lowers; final two poses provide a natural settle.",
+        "Plume tail stays at viewer-left; ears and paws are fully inside every cell.",
+        "Feet share alpha bottom 199, horizontal span is 177-182 pixels while head height decreases from y=8 to y=69, consistent with lowering rather than enlargement."
+      ],
+      "inspected_contact": "qa\\v11-art\\lying-down-contact.jpg",
+      "inspected_gif": "qa\\v11-art\\lying-down.gif",
+      "gif_frame_sample": "qa\\v11-art\\lying-down-gif-decoded.png",
+      "source_sha256": "48b418e3cab8dd46b7cb4a1fe9b20fa90f8d490227fc4fb1883a191ca3ea2dbd",
+      "metrics": {
+        "gif_frames": 6,
+        "gif_durations_ms": [
+          180,
+          180,
+          180,
+          220,
+          240,
+          300
+        ],
+        "frames": [
+          {
+            "file": "00.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              5,
+              8,
+              187,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "01.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              7,
+              28,
+              184,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "02.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              5,
+              39,
+              187,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "03.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              5,
+              58,
+              187,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "04.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              5,
+              68,
+              187,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          },
+          {
+            "file": "05.png",
+            "size": [
+              192,
+              208
+            ],
+            "alpha_bbox": [
+              5,
+              69,
+              187,
+              199
+            ],
+            "pink_pixel_count": 0,
+            "hidden_rgb_count": 0
+          }
+        ]
+      }
+    }
+  },
+  "metrics_file": "qa\\v11-art\\visual-review-metrics.json"
+}

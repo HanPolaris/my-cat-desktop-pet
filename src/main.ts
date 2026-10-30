@@ -9,98 +9,223 @@ import {
 } from "electron";
 import fs from "node:fs";
 import path from "node:path";
-import { Behavior, Mode } from "./behavior";
+import { Behavior, Mode, PetAction } from "./behavior";
 import { QuotaClient } from "./quota";
-// The pet only paints small 2D sprites. Software rendering avoids GPU-driver
-// initialization failures without changing Chromium's sandbox protections.
+import { Point, clampAnchor, stepToward } from "./movement";
 app.disableHardwareAcceleration();
-const behavior = new Behavior(Date.now());
-const quota = new QuotaClient();
-let win: BrowserWindow;
-let statePath = "";
-let card = false;
-let menuOpen = false;
-let hit = false;
-let downAnchor: {
-  cursor: Electron.Point;
-  window: Electron.Point;
-} | null = null;
-let lastX = 0,
-  lastY = 0;
-let lastSave = 0;
-let timer: NodeJS.Timeout;
+const behavior = new Behavior(Date.now()),
+  quota = new QuotaClient();
+let win: BrowserWindow,
+  flag: BrowserWindow | null = null,
+  statePath = "",
+  card = false,
+  menuOpen = false,
+  hit = false;
+let downAnchor: { cursor: Point; window: Point } | null = null;
+let anchor: Point = { x: 300, y: 400 },
+  wakeTarget: Point | null = null,
+  facing: "left" | "right" = "right",
+  moving = false;
+let lastTick = Date.now(),
+  lastSave = 0,
+  vocalId = 0,
+  timer: NodeJS.Timeout;
+let quitting = false;
+const areas = () => screen.getAllDisplays().map((d) => d.workArea);
 function logDiagnostic(message: string) {
-  if (!statePath) return;
-  fs.appendFileSync(
-    path.join(path.dirname(statePath), "diagnostics.log"),
-    `${new Date().toISOString()} ${message}\n`,
+  if (statePath)
+    fs.appendFileSync(
+      path.join(path.dirname(statePath), "diagnostics.log"),
+      new Date().toISOString() + " " + message + "\n",
+    );
+}
+process.on("uncaughtExceptionMonitor", (error) => {
+  logDiagnostic("uncaught " + (error.stack || error.message));
+});
+function save() {
+  if (win && !win.isDestroyed())
+    fs.writeFileSync(
+      statePath,
+      JSON.stringify({
+        x: anchor.x - 300,
+        y: anchor.y - 400,
+        muted: behavior.muted,
+      }),
+    );
+}
+function setAnchor(p: Point, clamp = true) {
+  anchor = clamp ? clampAnchor(p, areas()) : p;
+  win.setPosition(
+    Math.round(anchor.x - 300),
+    Math.round(anchor.y - 400),
+    false,
   );
 }
-function save() {
-  if (!win || win.isDestroyed()) return;
-  const [x, y] = win.getPosition();
-  fs.writeFileSync(statePath, JSON.stringify({ x, y, muted: behavior.muted }));
+function hideFlag() {
+  if (flag && !flag.isDestroyed()) flag.hide();
+  wakeTarget = null;
 }
-function clampPosition(x: number, y: number) {
-  const d = screen.getDisplayNearestPoint({ x: x + 300, y: y + 400 }).workArea;
-  return {
-    x: Math.round(Math.max(d.x - 200, Math.min(d.x + d.width - 400, x))),
-    y: Math.round(Math.max(d.y - 240, Math.min(d.y + d.height - 510, y))),
-  };
-}
-function moveTo(x: number, y: number) {
-  const p = clampPosition(x, y);
-  win.setPosition(p.x, p.y, false);
+function markWakeTarget() {
+  wakeTarget = screen.getCursorScreenPoint();
+  const target = wakeTarget;
+  if (!flag || flag.isDestroyed()) {
+    flag = new BrowserWindow({
+      width: 44,
+      height: 56,
+      transparent: true,
+      frame: false,
+      resizable: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      focusable: false,
+      show: false,
+      hasShadow: false,
+      webPreferences: {
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    });
+    flag.setIgnoreMouseEvents(true);
+    const createdFlag = flag;
+    createdFlag.once("closed", () => {
+      if (flag === createdFlag) flag = null;
+    });
+    flag
+      .loadURL(
+        "data:text/html;charset=utf-8," +
+          encodeURIComponent(
+            '<html><body style="margin:0;background:transparent"><svg width="44" height="56" xmlns="http://www.w3.org/2000/svg"><path d="M8 52V4" stroke="#886b3b" stroke-width="3"/><path d="M10 5h28l-8 10 8 10H10Z" fill="#e9b64a" stroke="#b88521"/></svg></body></html>',
+          ),
+      )
+      .catch((error) => logDiagnostic("flag-load-failed " + error.message));
+  }
+  const a = screen.getDisplayNearestPoint(target).workArea;
+  flag.setPosition(
+    Math.round(Math.max(a.x, Math.min(a.x + a.width - 44, target.x - 8))),
+    Math.round(Math.max(a.y, Math.min(a.y + a.height - 56, target.y - 52))),
+  );
+  flag.showInactive();
 }
 function send(extra: Record<string, unknown> = {}) {
-  if (!win?.isDestroyed())
-    win.webContents.send("pet:update", {
-      mode: behavior.mode,
-      muted: behavior.muted,
-      suspended: behavior.suspended,
-      card,
-      ...extra,
-    });
+  if (!win || win.isDestroyed()) return;
+  const now = Date.now();
+  win.webContents.send("pet:update", {
+    mode: behavior.mode,
+    epoch: behavior.epoch,
+    modeStartedAt: behavior.modeAt,
+    modeDuration: Number.isFinite(behavior.until)
+      ? behavior.until - behavior.modeAt
+      : null,
+    modeElapsed: now - behavior.modeAt,
+    progress: Number.isFinite(behavior.until)
+      ? Math.max(
+          0,
+          Math.min(
+            1,
+            (now - behavior.modeAt) / (behavior.until - behavior.modeAt),
+          ),
+        )
+      : 0,
+    muted: behavior.muted,
+    suspended: behavior.suspended,
+    songPlaying: behavior.songPlaying,
+    card,
+    facing,
+    moving,
+    petOffset: { x: 0, y: 0 },
+    anchor,
+    ...extra,
+  });
+}
+function showQuota() {
+  card = !card;
+  send({ quotaLoading: card });
+  if (card) {
+    win.focus();
+    quota.read().then((q) => send({ quota: q, quotaLoading: false }));
+  }
+}
+function actions(list: PetAction[]) {
+  for (const action of list) {
+    if (action.type === "wake-target") markWakeTarget();
+    else if (action.type === "quota") showQuota();
+    else
+      send({
+        vocal: {
+          id: ++vocalId,
+          kind: action.durationMs ? "wake" : action.count === 1 ? "one" : "two",
+        },
+      });
+  }
+}
+function begin(mode: Mode, duration?: number) {
+  downAnchor = null;
+  menuOpen = false;
+  card = false;
+  hideFlag();
+  behavior.begin(mode, Date.now(), duration);
+  actions(behavior.tick(Date.now()));
+  send();
 }
 function esc() {
   card = false;
-  if (behavior.mode !== "sleeping") behavior.stop(Date.now());
+  if (!["sleeping", "yawning"].includes(behavior.mode)) begin("idle");
   send();
 }
 function syncEscape() {
-  const needed = card || ["chase", "wand"].includes(behavior.mode);
+  const needed =
+    card ||
+    ["chase", "chase-pounce", "ball", "walking"].includes(behavior.mode);
   if (needed && !globalShortcut.isRegistered("Escape"))
     globalShortcut.register("Escape", esc);
   if (!needed && globalShortcut.isRegistered("Escape"))
     globalShortcut.unregister("Escape");
 }
-function begin(mode: Mode) {
-  downAnchor = null;
-  menuOpen = false;
-  card = false;
-  behavior.begin(mode, Date.now());
-  send();
-}
 function menu() {
-  behavior.interact(Date.now());
   menuOpen = true;
+  const asleep = ["sleeping", "yawning"].includes(behavior.mode);
   Menu.buildFromTemplate([
     {
-      label:
-        behavior.mode === "sleeping" ? "叫醒小米" : "让小米睡觉（20 分钟）",
-      click: () => begin(behavior.mode === "sleeping" ? "waking" : "sleeping"),
+      label: "睡觉",
+      submenu: [
+        {
+          label: "选择睡觉时间",
+          submenu: [5, 10, 20, 30, 60].map((minutes) => ({
+            label: minutes === 60 ? "1 小时" : minutes + " 分钟",
+            click: () => begin("sleeping", minutes * 60000),
+          })),
+        },
+        { label: "停止睡觉", enabled: asleep, click: () => begin("waking") },
+      ],
     },
-    { label: "玩耍逗猫棒", click: () => begin("wand") },
-    { label: "追逐扑鼠标", click: () => begin("chase") },
-    { label: "喂零食", click: () => begin("feeding") },
-    { label: "停止玩耍", click: () => begin("idle") },
+    {
+      label: "玩耍",
+      enabled: !asleep,
+      submenu: [
+        { label: "玩球（1 分钟）", click: () => begin("ball") },
+        { label: "追逐鼠标", click: () => begin("chase") },
+        { label: "停止玩耍", click: () => begin("idle") },
+      ],
+    },
+    { label: "喂食", enabled: !asleep, click: () => begin("feeding") },
+    {
+      label: behavior.songPlaying ? "停止喵喵" : "喵喵叫",
+      enabled: !asleep,
+      click: () => {
+        behavior.toggleSong();
+        send();
+      },
+    },
     { type: "separator" },
+    { label: "猫叫音效：罗小黑", enabled: false },
     {
       label: "静音",
       type: "checkbox",
       checked: behavior.muted,
       click: (item) => {
         behavior.muted = item.checked;
+        if (item.checked) behavior.songPlaying = false;
         save();
         send();
       },
@@ -111,7 +236,6 @@ function menu() {
     window: win,
     callback: () => {
       menuOpen = false;
-      behavior.interact(Date.now());
     },
   });
 }
@@ -120,21 +244,27 @@ else
   app.whenReady().then(() => {
     statePath = path.join(app.getPath("userData"), "position.json");
     fs.mkdirSync(path.dirname(statePath), { recursive: true });
-    logDiagnostic(`startup software-rendering Electron ${process.versions.electron}`);
+    logDiagnostic(
+      "startup V1.1 software-rendering Electron " + process.versions.electron,
+    );
     let saved: any = {};
     try {
       saved = JSON.parse(fs.readFileSync(statePath, "utf8"));
     } catch {}
     behavior.muted = !!saved.muted;
-    const area = screen.getPrimaryDisplay().workArea;
-    const position = clampPosition(
-      Number.isFinite(saved.x) ? saved.x : area.x + area.width - 620,
-      Number.isFinite(saved.y) ? saved.y : area.y + area.height - 650,
+    const a = screen.getPrimaryDisplay().workArea;
+    anchor = clampAnchor(
+      {
+        x: Number.isFinite(saved.x) ? saved.x + 300 : a.x + a.width - 320,
+        y: Number.isFinite(saved.y) ? saved.y + 400 : a.y + a.height - 250,
+      },
+      areas(),
     );
     win = new BrowserWindow({
       width: 600,
       height: 650,
-      ...position,
+      x: Math.round(anchor.x - 300),
+      y: Math.round(anchor.y - 400),
       transparent: true,
       frame: false,
       resizable: false,
@@ -160,99 +290,135 @@ else
       }
     });
     win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-    win.webContents.on("render-process-gone", (_event, details) => {
-      logDiagnostic(`renderer-exit reason=${details.reason} code=${details.exitCode}`);
-    });
-    win.webContents.on("did-fail-load", (_event, code, description) => {
-      logDiagnostic(`load-failed code=${code} ${description}`);
-    });
     win.webContents.on("will-navigate", (event) => event.preventDefault());
-    const trusted = (event: Electron.IpcMainEvent) =>
-      event.sender === win.webContents;
-    ipcMain.on("pet:hit", (event, value) => {
-      if (!trusted(event)) return;
-      hit = value === true;
-      win.setIgnoreMouseEvents(!hit && !behavior.pointerHeld, {
-        forward: true,
-      });
+    win.webContents.on("render-process-gone", (_event, d) =>
+      logDiagnostic("renderer-exit " + d.reason + " " + d.exitCode),
+    );
+    win.webContents.on("did-fail-load", (_event, c, d) =>
+      logDiagnostic("load-failed " + c + " " + d),
+    );
+    const trusted = (e: Electron.IpcMainEvent) => e.sender === win.webContents;
+    ipcMain.on("pet:hit", (e, v) => {
+      if (trusted(e)) {
+        hit = v === true;
+        win.setIgnoreMouseEvents(!hit && !behavior.pointerHeld, {
+          forward: true,
+        });
+      }
     });
-    ipcMain.on("pet:down", (event) => {
-      if (!trusted(event)) return;
-      const c = screen.getCursorScreenPoint();
-      const [x, y] = win.getPosition();
+    ipcMain.on("pet:down", (e) => {
+      if (!trusted(e)) return;
+      const c = screen.getCursorScreenPoint(),
+        [x, y] = win.getPosition();
       behavior.pointerDown(Date.now(), c.x, c.y);
       downAnchor = { cursor: c, window: { x, y } };
     });
-    ipcMain.on("pet:up", (event) => {
-      if (!trusted(event)) return;
-      const click = behavior.pointerUp(Date.now());
+    ipcMain.on("pet:up", (e) => {
+      if (!trusted(e)) return;
+      behavior.pointerUp(Date.now());
       downAnchor = null;
       save();
-      if (click) {
-        card = !card;
-        send({ quotaLoading: card });
-        if (card) {
-          win.focus();
-          quota.read().then((q) => send({ quota: q, quotaLoading: false }));
-        }
-      }
+      actions(behavior.tick(Date.now()));
       send();
     });
-    ipcMain.on("pet:menu", (event) => {
-      if (trusted(event)) menu();
+    ipcMain.on("pet:menu", (e) => {
+      if (trusted(e)) menu();
     });
-    ipcMain.on("pet:escape", (event) => {
-      if (trusted(event)) esc();
+    ipcMain.on("pet:escape", (e) => {
+      if (trusted(e)) esc();
     });
-    ipcMain.on("pet:close-quota", (event) => {
-      if (trusted(event)) {
+    ipcMain.on("pet:close-quota", (e) => {
+      if (trusted(e)) {
         card = false;
         send();
       }
     });
-    ipcMain.on("pet:quota", (event) => {
-      if (trusted(event))
+    ipcMain.on("pet:quota", (e) => {
+      if (trusted(e))
         quota.read().then((q) => send({ quota: q, quotaLoading: false }));
+    });
+    ipcMain.on("pet:song-ended", (e) => {
+      if (trusted(e)) {
+        behavior.songPlaying = false;
+        send();
+      }
     });
     const suspend = () => {
       behavior.suspend();
+      downAnchor = null;
+      hideFlag();
       send();
     };
     const resume = () => {
       behavior.resume(Date.now());
+      lastTick = Date.now();
+      actions(behavior.tick(Date.now()));
       send();
     };
     powerMonitor.on("suspend", suspend);
     powerMonitor.on("lock-screen", suspend);
     powerMonitor.on("resume", resume);
     powerMonitor.on("unlock-screen", resume);
-    screen.on("display-removed", () => {
-      const [x, y] = win.getPosition();
-      moveTo(x, y);
+    const reclamp = () => {
+      setAnchor(anchor);
       save();
-    });
-    screen.on("display-metrics-changed", () => {
-      const [x, y] = win.getPosition();
-      moveTo(x, y);
-    });
+    };
+    screen.on("display-removed", reclamp);
+    screen.on("display-metrics-changed", reclamp);
     timer = setInterval(() => {
       if (win.isDestroyed()) return;
       const now = Date.now(),
+        dt = (now - lastTick) / 1000,
         c = screen.getCursorScreenPoint();
+      lastTick = now;
+      moving = false;
       if (downAnchor && behavior.pointerMove(now, c.x, c.y)) {
-        moveTo(
-          downAnchor.window.x + c.x - downAnchor.cursor.x,
-          downAnchor.window.y + c.y - downAnchor.cursor.y,
-        );
+        hideFlag();
+        setAnchor({
+          x: downAnchor.window.x + 300 + c.x - downAnchor.cursor.x,
+          y: downAnchor.window.y + 400 + c.y - downAnchor.cursor.y,
+        });
       }
       behavior.hover(now, hit && !card && !menuOpen);
-      const action = behavior.tick(now);
-      const [x, y] = win.getPosition();
-      const work = screen.getDisplayNearestPoint({
-        x: x + 300,
-        y: y + 400,
-      }).workArea;
+      actions(behavior.tick(now));
+      if (
+        !behavior.suspended &&
+        !menuOpen &&
+        !card &&
+        ["walking", "chase", "chase-pounce"].includes(behavior.mode)
+      ) {
+        const raw = behavior.mode === "walking" ? wakeTarget : c;
+        if (raw) {
+          const target = clampAnchor(raw, areas()),
+            distance = Math.hypot(target.x - anchor.x, target.y - anchor.y),
+            stopDistance = behavior.mode === "walking" ? 3 : 38;
+          if (distance > stopDistance) {
+            facing = target.x < anchor.x ? "left" : "right";
+            setAnchor(
+              stepToward(
+                anchor,
+                target,
+                behavior.mode === "walking"
+                  ? 170
+                  : behavior.mode === "chase-pounce"
+                    ? 140
+                    : 330,
+                dt,
+              ),
+              false,
+            );
+            moving = true;
+          } else if (behavior.mode === "walking") {
+            behavior.arrive(now);
+            hideFlag();
+            save();
+          }
+        }
+      }
+      const [x, y] = win.getPosition(),
+        work = screen.getDisplayNearestPoint(anchor).workArea;
       send({
+        cursor: { x: c.x - x, y: c.y - y },
         viewport: {
           left: Math.max(0, work.x - x),
           right: Math.min(600, work.x + work.width - x),
@@ -265,25 +431,28 @@ else
           top: Math.max(104, work.y - y + 104),
           bottom: Math.min(546, work.y + work.height - y - 104),
         },
-        cursor: { x: c.x - x, y: c.y - y },
-        meow: action === "meow" && !behavior.muted,
       });
       syncEscape();
-      if ((x !== lastX || y !== lastY) && now - lastSave > 1000) {
+      if (moving && now - lastSave > 1000) {
         save();
         lastSave = now;
-        lastX = x;
-        lastY = y;
       }
-    }, 33);
+    }, 16);
   });
 app.on("before-quit", () => {
+  if (quitting) return;
+  quitting = true;
   clearInterval(timer);
   save();
   quota.close();
+  const closingFlag = flag;
+  flag = null;
+  if (closingFlag && !closingFlag.isDestroyed()) closingFlag.destroy();
   globalShortcut.unregisterAll();
 });
-app.on("window-all-closed", () => app.quit());
-app.on("child-process-gone", (_event, details) => {
-  logDiagnostic(`child-exit type=${details.type} reason=${details.reason} code=${details.exitCode}`);
+app.on("window-all-closed", () => {
+  if (!quitting) app.quit();
 });
+app.on("child-process-gone", (_e, d) =>
+  logDiagnostic("child-exit " + d.type + " " + d.reason + " " + d.exitCode),
+);
