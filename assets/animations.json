@@ -1,0 +1,294 @@
+{
+  "cellWidth": 192,
+  "cellHeight": 208,
+  "animations": {
+    "idle": {
+      "file": "extra/idle.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        2800,
+        110,
+        110,
+        140,
+        140,
+        320
+      ],
+      "loop": true
+    },
+    "running-right": {
+      "file": "extra/running-right.webp",
+      "frames": 8,
+      "row": 0,
+      "columns": 8,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "loop": true
+    },
+    "running-left": {
+      "file": "extra/running-left.webp",
+      "frames": 8,
+      "row": 0,
+      "columns": 8,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "loop": true
+    },
+    "waving": {
+      "file": "extra/waving.webp",
+      "frames": 4,
+      "row": 0,
+      "columns": 4,
+      "durations": [
+        140,
+        140,
+        140,
+        280
+      ],
+      "loop": true
+    },
+    "jumping": {
+      "file": "extra/jumping.webp",
+      "frames": 5,
+      "row": 0,
+      "columns": 5,
+      "durations": [
+        140,
+        140,
+        140,
+        140,
+        280
+      ],
+      "loop": true
+    },
+    "failed": {
+      "file": "extra/failed.webp",
+      "frames": 8,
+      "row": 0,
+      "columns": 8,
+      "durations": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        240
+      ],
+      "loop": true
+    },
+    "waiting": {
+      "file": "extra/waiting.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        260
+      ],
+      "loop": true
+    },
+    "running": {
+      "file": "extra/running.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "loop": true
+    },
+    "review": {
+      "file": "extra/review.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        280
+      ],
+      "loop": true
+    },
+    "sleeping": {
+      "file": "extra/sleeping.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        550,
+        550,
+        550,
+        550,
+        550,
+        550
+      ],
+      "loop": true
+    },
+    "side-lie": {
+      "file": "extra/side-lie.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        550,
+        550,
+        550,
+        550,
+        550,
+        550
+      ],
+      "loop": true
+    },
+    "stretch-paws": {
+      "file": "extra/stretch-paws.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": true
+    },
+    "grooming": {
+      "file": "extra/grooming.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": true
+    },
+    "stretching": {
+      "file": "extra/stretching.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": false
+    },
+    "waking": {
+      "file": "extra/waking.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": false
+    },
+    "pouncing": {
+      "file": "extra/pouncing.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": false
+    },
+    "dragging": {
+      "file": "extra/dragging.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": true
+    },
+    "eating": {
+      "file": "extra/eating.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        200,
+        180,
+        180,
+        180,
+        200,
+        360
+      ],
+      "loop": true
+    },
+    "meowing": {
+      "file": "extra/meowing.webp",
+      "frames": 6,
+      "row": 0,
+      "columns": 6,
+      "durations": [
+        250,
+        200,
+        300,
+        200,
+        250,
+        400
+      ],
+      "loop": true
+    }
+  }
+}

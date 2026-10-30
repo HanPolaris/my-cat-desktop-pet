@@ -1,0 +1,9 @@
+node_modules/
+dist/
+release/
+.runtime/
+art-run/
+media-analysis/tools/
+media-analysis/audio-reference/
+media-analysis/video-audio.wav
+qa/runtime/

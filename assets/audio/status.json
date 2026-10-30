@@ -1,0 +1,13 @@
+{
+  "available": true,
+  "label": "罗小黑猫叫",
+  "reason": "主人确认原视频没有猫叫，改为使用罗小黑猫形态的短猫叫。",
+  "source": "Luo Xiaohei cat-form collaboration voice clips CN_010 and CN_011",
+  "sourcePage": "https://github.com/PseudoMon/arknights-audio/tree/global-server-voices/voice/char_4067_lolxh",
+  "auditionFile": "assets/audio/meow.wav",
+  "sourceHasAudio": true,
+  "verifiedMeow": true,
+  "syntheticReplacementUsed": false,
+  "edits": "Two short cat-form clips, resampled to 44100 Hz mono PCM, volume multiplied by 0.325, separated by 180ms and delayed by 150ms for animation. After user audition, gain reduced another 6dB with gentle fades. No voice cloning or pitch transformation.",
+  "attribution": "Luo Xiaohei / Arknights collaboration character audio. Original rights retained by the respective owners; source archive is community maintained."
+}

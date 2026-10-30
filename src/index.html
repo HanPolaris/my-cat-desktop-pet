@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" /><meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self'; script-src 'self'"
+  /><title>小米桌宠</title
+  ><link rel="stylesheet" href="style.css" />
+  <body>
+    <canvas
+      id="pet"
+      width="600"
+      height="650"
+      aria-label="小米桌宠，右键打开菜单"
+    ></canvas>
+    <section id="quota" hidden>
+      <header>
+        小米帮你看额度 <button id="close" aria-label="关闭">×</button>
+      </header>
+      <div id="quota-body">正在读取…</div>
+      <footer>
+        <span id="audio-state"></span><button id="refresh">刷新</button>
+      </footer>
+    </section>
+    <script src="renderer.js"></script>
+  </body>
+</html>
